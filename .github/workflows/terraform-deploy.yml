@@ -1,4 +1,5 @@
 name: Terraform reusable workflow
+
 on:
   workflow_call:
     inputs:
@@ -24,77 +25,120 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3
 
-      - id: install-aws-cli
-        uses: unfor19/install-aws-cli-action@v1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          version: 2
-
-      - name: Assume Role
-        id: assume-role
-        shell: bash
-        run: |
-          role_arn="arn:aws:iam::043309332268:role/test"
-          role_output=$(aws sts assume-role --role-arn $role_arn --role-session-name "DevopsAdmin-Session")
-
-          echo "AWS_ACCESS_KEY_ID=$(echo $role_output | jq -r .Credentials.AccessKeyId)" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=$(echo $role_output | jq -r .Credentials.SecretAccessKey)" >> $GITHUB_ENV
-          echo "AWS_SESSION_TOKEN=$(echo $role_output | jq -r .Credentials.SessionToken)" >> $GITHUB_ENV
-          echo "AWS_REGION=${{ inputs.AWS_REGION }}" >> $GITHUB_ENV
-
-          # Debugging: Output the credentials (not recommended in production)
-          echo "DEBUG: AWS_ACCESS_KEY_ID=$(echo $role_output | jq -r .Credentials.AccessKeyId)"
-          echo "DEBUG: AWS_SECRET_ACCESS_KEY=$(echo $role_output | jq -r .Credentials.SecretAccessKey)"
-          echo "DEBUG: AWS_SESSION_TOKEN=$(echo $role_output | jq -r .Credentials.SessionToken)"
-
-      - name: Configure AWS CLI
-        run: |
-          aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
-          aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
-          aws configure set aws_session_token "$AWS_SESSION_TOKEN"
-          aws configure set region "$AWS_REGION"
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}  # The role ARN to assume
+          aws-region: ${{ inputs.AWS_REGION }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.3.0
 
-      - name: Terraform init
+      - name: Terraform Init
         id: init
-        shell: bash
         run: |
-          terraform workspace select $TF_WORKSPACE || terraform workspace new $TF_WORKSPACE
           cd terraform
+          terraform workspace select $TF_WORKSPACE || terraform workspace new $TF_WORKSPACE
           terraform init -input=false
           echo "TF Provider now initialized"
           echo "-------------------------------------"
 
-      - name: Terraform format
+      - name: Terraform Format
         id: fmt
-        shell: bash
         run: |
           cd terraform
           terraform fmt
 
-      - name: Terraform validate
+      - name: Terraform Validate
         id: validate
-        shell: bash
         run: |
           cd terraform
           terraform validate
 
-      - name: Terraform plan
+      - name: Terraform Plan
         id: plan
-        shell: bash
         run: |
           cd terraform
           terraform plan -out=tfplan
-        continue-on-error: false
 
-      - name: Terraform apply
+      - name: Terraform Apply
         id: apply
         run: |
           cd terraform
           terraform apply -input=false -auto-approve
-        continue-on-error: false
+name: Terraform reusable workflow
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+      AWS_REGION:
+        required: true
+        type: string
+      TF_WORKSPACE:
+        required: true
+        type: string
+    secrets:
+      AWS_ASSUME_ROLE:
+        required: true
+
+jobs:
+  terraform-init:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ inputs.AWS_REGION }}
+      TF_WORKSPACE: ${{ inputs.TF_WORKSPACE }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}  # The role ARN to assume
+          aws-region: ${{ inputs.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.3.0
+
+      - name: Terraform Init
+        id: init
+        run: |
+          cd terraform
+          terraform workspace select $TF_WORKSPACE || terraform workspace new $TF_WORKSPACE
+          terraform init -input=false
+          echo "TF Provider now initialized"
+          echo "-------------------------------------"
+
+      - name: Terraform Format
+        id: fmt
+        run: |
+          cd terraform
+          terraform fmt
+
+      - name: Terraform Validate
+        id: validate
+        run: |
+          cd terraform
+          terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd terraform
+          terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        id: apply
+        run: |
+          cd terraform
+          terraform apply -input=false -auto-approve
