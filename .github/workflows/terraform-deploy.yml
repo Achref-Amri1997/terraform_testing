@@ -45,6 +45,11 @@ jobs:
           echo "AWS_SESSION_TOKEN=$(echo $role_output | jq -r .Credentials.SessionToken)" >> $GITHUB_ENV
           echo "AWS_REGION=${{ inputs.AWS_REGION }}" >> $GITHUB_ENV
 
+          # Debugging: Output the credentials (not recommended in production)
+          echo "DEBUG: AWS_ACCESS_KEY_ID=$(echo $role_output | jq -r .Credentials.AccessKeyId)"
+          echo "DEBUG: AWS_SECRET_ACCESS_KEY=$(echo $role_output | jq -r .Credentials.SecretAccessKey)"
+          echo "DEBUG: AWS_SESSION_TOKEN=$(echo $role_output | jq -r .Credentials.SessionToken)"
+
       - name: Configure AWS CLI
         run: |
           aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
