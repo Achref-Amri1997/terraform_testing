@@ -1,16 +1,16 @@
 name: AWS-as-Code-for-test
-run-name: "Requester (${{ github.actor }}) - ${{github.event.ref }} - ${{github.event.head_commit.message }}"
+run-name: "Requester (${{ github.actor }}) - ${{ github.event.ref }} - ${{ github.event.head_commit.message }}"
 on:
- push:
- branches:
- - 'main'
+  push:
+    branches:
+      - 'main'
+
 jobs:
- terraform_job:
- uses: ./.github/workflows/terraform-deploy.yml
- name: Terraform to test
- with:
- env: test
- AWS_REGION: ${{ vars.AWS_REGION }}
- TF_WORKSPACE: test
- secrets:
- AWS_ASSUME_ROLE: ${{secrets.AWS_ASSUME_ROLE_DEV }}
+  terraform_job:
+    uses: ./.github/workflows/terraform-deploy.yml
+    with:
+      env: test
+      AWS_REGION: ${{ secrets.AWS_REGION }}  # Ensure this is a secret or variable set in your repo
+      TF_WORKSPACE: test
+    secrets:
+      AWS_ASSUME_ROLE: ${{ secrets.AWS_ASSUME_ROLE_DEV }}  # Ensure this is set as a secret
