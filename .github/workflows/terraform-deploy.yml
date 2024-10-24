@@ -23,20 +23,21 @@ jobs:
       TF_WORKSPACE: ${{ inputs.TF_WORKSPACE }}
 
     steps:
-	- name: Checkout
+      - name: Checkout
         uses: actions/checkout@v3.5.3
+
       - id: install-aws-cli
         uses: unfor19/install-aws-cli-action@v1
         with:
           version: 2
-      
+
       - name: Assume Role
         id: assume-role
         shell: bash
         run: |
-	    role_arn= "arn:aws:iam::043309332268:role/test"
-          role_output=$(aws sts assume-role --role-arn role_arn --role-session-name "DevopsAdmin-Session")
-          
+          role_arn="arn:aws:iam::043309332268:role/test"
+          role_output=$(aws sts assume-role --role-arn $role_arn --role-session-name "DevopsAdmin-Session")
+
           echo "AWS_ACCESS_KEY_ID=$(echo $role_output | jq -r .Credentials.AccessKeyId)" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=$(echo $role_output | jq -r .Credentials.SecretAccessKey)" >> $GITHUB_ENV
           echo "AWS_SESSION_TOKEN=$(echo $role_output | jq -r .Credentials.SessionToken)" >> $GITHUB_ENV
@@ -54,8 +55,6 @@ jobs:
           aws configure set aws_session_token "$AWS_SESSION_TOKEN"
           aws configure set region "$AWS_REGION"
 
-     
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
@@ -65,7 +64,7 @@ jobs:
         id: init
         shell: bash
         run: |
-          terraform workspace list
+          terraform workspace select $TF_WORKSPACE || terraform workspace new $TF_WORKSPACE
           cd terraform
           terraform init -input=false
           echo "TF Provider now initialized"
