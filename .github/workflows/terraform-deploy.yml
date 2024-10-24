@@ -31,9 +31,12 @@ jobs:
       - name: Assume Role
         id: assume-role
         shell: bash
-        #run: |
-         # role_output=$(aws sts assume-role --role-arn ${{ secrets.AWS_ASSUME_ROLE_DEV }} --role-session-name "DevopsAdmin-Session" --output json)
-         # echo "Assumed role output: $role_output"
+        run: |
+          role_output=$(aws sts assume-role --role-arn "${{ secrets.AWS_ASSUME_ROLE_DEV }}" --role-session-name "DevopsAdmin-Session" --output json)
+          echo "Assumed role output: $role_output"
+          echo "AWS_ACCESS_KEY_ID=$(echo $role_output | jq -r .Credentials.AccessKeyId)" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$(echo $role_output | jq -r .Credentials.SecretAccessKey)" >> $GITHUB_ENV
+          echo "AWS_SESSION_TOKEN=$(echo $role_output | jq -r .Credentials.SessionToken)" >> $GITHUB_ENV
 
       - name: Checkout
         uses: actions/checkout@v3.5.3
