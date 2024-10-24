@@ -23,6 +23,8 @@ jobs:
       TF_WORKSPACE: ${{ inputs.TF_WORKSPACE }}
 
     steps:
+	- name: Checkout
+        uses: actions/checkout@v3.5.3
       - id: install-aws-cli
         uses: unfor19/install-aws-cli-action@v1
         with:
@@ -32,8 +34,9 @@ jobs:
         id: assume-role
         shell: bash
         run: |
-          role_output=$(aws sts assume-role --role-arn "arn:aws:iam::043309332268:role/test" --role-session-name "DevopsAdmin-Session" --output json)
-          echo "Assumed role output: $role_output"
+	    role_arn= "arn:aws:iam::043309332268:role/test"
+          role_output=$(aws sts assume-role --role-arn role_arn --role-session-name "DevopsAdmin-Session")
+          
           echo "AWS_ACCESS_KEY_ID=$(echo $role_output | jq -r .Credentials.AccessKeyId)" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=$(echo $role_output | jq -r .Credentials.SecretAccessKey)" >> $GITHUB_ENV
           echo "AWS_SESSION_TOKEN=$(echo $role_output | jq -r .Credentials.SessionToken)" >> $GITHUB_ENV
@@ -51,8 +54,7 @@ jobs:
           aws configure set aws_session_token "$AWS_SESSION_TOKEN"
           aws configure set region "$AWS_REGION"
 
-      - name: Checkout
-        uses: actions/checkout@v3.5.3
+     
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
