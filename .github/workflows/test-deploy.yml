@@ -10,7 +10,7 @@ jobs:
     uses: ./.github/workflows/terraform-deploy.yml
     with:
       env: test
-      AWS_REGION: ${{ secrets.AWS_REGION }}  # Ensure this is a secret or variable set in your repo
+      AWS_REGION: ${{ vars.AWS_REGION }}
       TF_WORKSPACE: test
     secrets:
       AWS_ASSUME_ROLE: ${{ secrets.AWS_ASSUME_ROLE_DEV }}  # Ensure this is set as a secret
