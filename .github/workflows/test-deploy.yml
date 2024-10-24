@@ -13,4 +13,4 @@ jobs:
  AWS_REGION: ${{ vars.AWS_REGION }}
  TF_WORKSPACE: test
  secrets:
- AWS_ASSUME_ROLE: ${{secrets.TEST_AWS_ASSUME_ROLE }}
+ AWS_ASSUME_ROLE: ${{secrets.AWS_ASSUME_ROLE_DEV }}
