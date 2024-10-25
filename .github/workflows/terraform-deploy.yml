@@ -1,6 +1,9 @@
 name: 'Terraform'
 
-
+on:
+  push:
+    branches:
+      - main  # Trigger on changes to the 'main' branch
 permissions:
   id-token: write
   contents: read
