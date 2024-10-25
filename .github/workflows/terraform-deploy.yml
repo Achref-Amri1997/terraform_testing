@@ -3,7 +3,8 @@ name: 'Terraform'
 on:
   push:
     branches:
-      - dev  
+      - dev  # Trigger on changes to the 'dev' branch
+
 permissions:
   id-token: write
   contents: read
@@ -34,12 +35,12 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-	working-directory: test_glue/
+      working-directory: test_glue/  # Specify your Terraform folder
 
     - name: Terraform Plan
       run: terraform plan
-	working-directory: test_glue/
+      working-directory: test_glue/  # Specify your Terraform folder
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
-	working-directory: test_glue/
+      working-directory: test_glue/  # Specify your Terraform folder
