@@ -3,8 +3,7 @@ name: 'Terraform'
 on:
   push:
     branches:
-      - dev  # Trigger on changes to the 'main' branch
-
+      - dev  
 permissions:
   id-token: write
   contents: read
@@ -22,8 +21,8 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        role-to-assume: arn:aws:iam::043309332268:role/testing
-        aws-region: eu-central-1
+        role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_DEV }}  
+        aws-region: ${{ vars.AWS_REGION }}  
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -35,9 +34,12 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
+	working-directory: test_glue/
 
     - name: Terraform Plan
       run: terraform plan
+	working-directory: test_glue/
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
+	working-directory: test_glue/
