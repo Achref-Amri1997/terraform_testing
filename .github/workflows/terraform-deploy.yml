@@ -1,12 +1,9 @@
 name: 'Terraform'
 
 on:
-  pull_request:
-    branches:
-      - dev  # Trigger on pull requests targeting the 'dev' branch
   push:
     branches:
-      - dev  # Trigger on direct pushes to the 'dev' branch
+      - dev  # Trigger on changes to the 'dev' branch
 
 permissions:
   id-token: write
@@ -22,29 +19,28 @@ jobs:
         shell: bash
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_DEV }}  
+        aws-region: ${{ vars.AWS_REGION }}  
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_DEV }}  
-          aws-region: ${{ vars.AWS_REGION }}  
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.9.8  
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.9.8  
 
-      - name: Terraform Init
-        run: terraform init
-        working-directory: test_glue/  # Specify your Terraform folder
+    - name: Terraform Init
+      run: terraform init
+      working-directory: test_glue/  # Specify your Terraform folder
 
-      - name: Terraform Plan
-        run: terraform plan
-        working-directory: test_glue/  # Specify your Terraform folder
+    - name: Terraform Plan
+      run: terraform plan
+      working-directory: test_glue/  # Specify your Terraform folder
 
-      - name: Terraform Apply
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-        run: terraform apply -auto-approve
-        working-directory: test_glue/  # Specify your Terraform folder
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+      working-directory: test_glue/  # Specify your Terraform folder
