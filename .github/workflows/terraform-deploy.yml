@@ -1,7 +1,7 @@
 name: 'Terraform Deploy'
 
 on:
-  workflow_call:  # This allows the workflow to be called by other workflows
+  workflow_call:
     inputs:
       env:
         required: true
@@ -12,7 +12,8 @@ on:
       TF_WORKSPACE:
         required: true
         type: string
-
+    secrets:
+      AWS_ASSUME_ROLE: 
 permissions:
   id-token: write
   contents: read
@@ -33,7 +34,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ github.ref == 'refs/heads/dev' && secrets.AWS_ASSUME_ROLE_DEV || secrets.AWS_ASSUME_ROLE_SIT }}  
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE }}
           aws-region: ${{ vars.AWS_REGION }}  
 
       - name: Set up Terraform
