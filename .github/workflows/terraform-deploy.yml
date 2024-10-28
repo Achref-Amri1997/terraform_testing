@@ -1,10 +1,17 @@
-name: 'Terraform'
+name: 'Terraform Deploy'
 
 on:
-  push:
-    branches:
-      - dev  # Trigger on changes to the 'dev' branch
-      - sit   # Trigger on changes to the 'sit' branch
+  workflow_call:  # This allows the workflow to be called by other workflows
+    inputs:
+      env:
+        required: true
+        type: string
+      AWS_REGION:
+        required: true
+        type: string
+      TF_WORKSPACE:
+        required: true
+        type: string
 
 permissions:
   id-token: write
