@@ -1,7 +1,7 @@
 
 
 resource "aws_s3_bucket" "my_bucket" {
-  bucket = "achreftestingnumber2"  
+  bucket = "achreftestingnumber22"  
 
  
 }
