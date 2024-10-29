@@ -3,7 +3,7 @@ name: Terraform Apply
 on:
   pull_request:
     branches:
-      - master
+      - sit
 
 jobs:
   terraform:
