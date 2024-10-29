@@ -35,7 +35,7 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan
-        working-directory: test_glue/  
+        working-directory: test_glue/  #bla bla bla
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
