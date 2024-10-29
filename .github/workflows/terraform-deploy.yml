@@ -1,10 +1,9 @@
 name: Terraform Apply
 
 on:
-  push:
+  pull_request:
     branches:
-      - dev
-      - sit
+      - master
 
 jobs:
   terraform:
@@ -22,7 +21,7 @@ jobs:
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: ${{ secrets.AWS_DEV_ROLE_DEV }} 
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_DEV }} 
           aws-region: ${{ vars.AWS_REGION }}  
 
       - name: Set up Terraform
